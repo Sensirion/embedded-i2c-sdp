@@ -45,23 +45,17 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-// TODO: DRIVER_GENERATOR Remove commands which shouldn't be tested
-// TODO: DRIVER_GENERATOR Adjust setup and teardown
-// TODO: DRIVER_GENERATOR Adjust all tests such that pre- and post conditions
-// are meet
-
 TEST_GROUP (SDP_Tests) {
     void setup() {
         sensirion_i2c_hal_init();
 
-        // Select MUX 1 channel 1 (TODO: DRIVER_GENERATOR choose correct mux
-        // position)
+        sdp_stop_continuous_measurement();
+        // Select MUX 1 channel 1 (TODO: attach SDP to testbed and adjust mux
         int16_t error = sensirion_i2c_mux_set_single_channel(0x71, 1);
         CHECK_EQUAL_ZERO_TEXT(error, "sensirion_i2c_mux_set_single_channel")
     }
 
     void teardown() {
-
         sensirion_i2c_hal_free();
     }
 };
@@ -72,9 +66,10 @@ TEST (
     int16_t error;
     error =
         sdp_start_continuous_measurement_with_mass_flow_t_comp_and_averaging();
-    CHECK_EQUAL_ZERO_TEXT(
-        error,
-        "sdp_start_continuous_measurement_with_mass_flow_t_comp_and_averaging");
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_start_continuous_measurement_with_"
+                                 "mass_flow_t_comp_and_averaging");
+    error = sdp_stop_continuous_measurement();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_stop_continuous_measurement");
 }
 
 TEST (SDP_Tests, SDP_Test_start_continuous_measurement_with_mass_flow_t_comp) {
@@ -82,6 +77,8 @@ TEST (SDP_Tests, SDP_Test_start_continuous_measurement_with_mass_flow_t_comp) {
     error = sdp_start_continuous_measurement_with_mass_flow_t_comp();
     CHECK_EQUAL_ZERO_TEXT(
         error, "sdp_start_continuous_measurement_with_mass_flow_t_comp");
+    error = sdp_stop_continuous_measurement();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_stop_continuous_measurement");
 }
 
 TEST (
@@ -90,8 +87,10 @@ TEST (
     int16_t error;
     error =
         sdp_start_continuous_measurement_with_diff_pressure_t_comp_and_averaging();
-    CHECK_EQUAL_ZERO_TEXT(error, "sdp_start_continuous_measurement_with_diff_"
-                                 "pressure_t_comp_and_averaging");
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_start_continuous_measurement_with_"
+                                 "diff_pressure_t_comp_and_averaging");
+    error = sdp_stop_continuous_measurement();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_stop_continuous_measurement");
 }
 
 TEST (SDP_Tests,
@@ -100,6 +99,8 @@ TEST (SDP_Tests,
     error = sdp_start_continuous_measurement_with_diff_pressure_t_comp();
     CHECK_EQUAL_ZERO_TEXT(
         error, "sdp_start_continuous_measurement_with_diff_pressure_t_comp");
+    error = sdp_stop_continuous_measurement();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_stop_continuous_measurement");
 }
 
 TEST (SDP_Tests, SDP_Test_stop_continuous_measurement) {
@@ -128,6 +129,31 @@ TEST (SDP_Tests, SDP_Test_read_measurement) {
     int16_t differential_pressure;
     int16_t temperature;
     int16_t scaling_factor;
+    error =
+        sdp_start_continuous_measurement_with_diff_pressure_t_comp_and_averaging();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_start_continuous_measurement_with_"
+                                 "diff_pressure_t_comp_and_averaging");
+
+    error = sdp_read_measurement(&differential_pressure, &temperature,
+                                 &scaling_factor);
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_read_measurement");
+    printf("Differential pressure: %i\n", differential_pressure);
+    printf("Temperature: %i\n", temperature);
+    printf("Scaling factor: %i\n", scaling_factor);
+
+    error = sdp_stop_continuous_measurement();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_stop_continuous_measurement");
+}
+
+TEST (SDP_Tests, SDP_Test_read_measurement_single_shot) {
+    int16_t error;
+    int16_t differential_pressure;
+    int16_t temperature;
+    int16_t scaling_factor;
+    error = sdp_trigger_measurement_with_diff_pressure_t_comp();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_start_continuous_measurement_with_"
+                                 "diff_pressure_t_comp_and_averaging");
+
     error = sdp_read_measurement(&differential_pressure, &temperature,
                                  &scaling_factor);
     CHECK_EQUAL_ZERO_TEXT(error, "sdp_read_measurement");
@@ -136,29 +162,23 @@ TEST (SDP_Tests, SDP_Test_read_measurement) {
     printf("Scaling factor: %i\n", scaling_factor);
 }
 
-TEST (SDP_Tests, SDP_Test_enter_sleep_mode) {
+TEST (SDP_Tests, SDP_Test_sleep_mode) {
     int16_t error;
     error = sdp_enter_sleep_mode();
     CHECK_EQUAL_ZERO_TEXT(error, "sdp_enter_sleep_mode");
-}
-
-TEST (SDP_Tests, SDP_Test_exit_sleep_mode) {
-    int16_t error;
+    error = sdp_exit_sleep_mode();
+    CHECK_EQUAL_TEXT(-1, error, "sdp_exit_sleep_mode");
     error = sdp_exit_sleep_mode();
     CHECK_EQUAL_ZERO_TEXT(error, "sdp_exit_sleep_mode");
-}
-
-TEST (SDP_Tests, SDP_Test_prepare_product_identifier) {
-    int16_t error;
-    error = sdp_prepare_product_identifier();
-    CHECK_EQUAL_ZERO_TEXT(error, "sdp_prepare_product_identifier");
 }
 
 TEST (SDP_Tests, SDP_Test_read_product_identifier) {
     int16_t error;
     uint32_t product_number;
-    uint8_t serial_number[42];
-    uint8_t serial_number_size = 42;
+    uint8_t serial_number[8];
+    uint8_t serial_number_size = 8;
+    error = sdp_prepare_product_identifier();
+    CHECK_EQUAL_ZERO_TEXT(error, "sdp_prepare_product_identifier");
     error = sdp_read_product_identifier(&product_number, &serial_number[0],
                                         serial_number_size);
     CHECK_EQUAL_ZERO_TEXT(error, "sdp_read_product_identifier");
