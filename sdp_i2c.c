@@ -147,16 +147,6 @@ int16_t sdp_read_measurement(int16_t* differential_pressure,
                              int16_t* temperature, int16_t* scaling_factor) {
     int16_t error;
     uint8_t buffer[9];
-    uint16_t offset = 0;
-    offset = sensirion_i2c_add_command_to_buffer(&buffer[0], offset, 0x01);
-
-    error = sensirion_i2c_write_data(SDP_I2C_ADDRESS, &buffer[0], offset);
-    if (error) {
-        return error;
-    }
-
-    sensirion_i2c_hal_sleep_usec(1000);
-
     error = sensirion_i2c_read_data_inplace(SDP_I2C_ADDRESS, &buffer[0], 6);
     if (error) {
         return error;
@@ -179,14 +169,9 @@ int16_t sdp_exit_sleep_mode(void) {
     int16_t error;
     uint8_t buffer[2];
     uint16_t offset = 0;
-    offset = sensirion_i2c_add_command_to_buffer(&buffer[0], offset, 0x02);
-
     error = sensirion_i2c_write_data(SDP_I2C_ADDRESS, &buffer[0], offset);
-    if (error) {
-        return error;
-    }
     sensirion_i2c_hal_sleep_usec(2000);
-    return NO_ERROR;
+    return error;
 }
 
 int16_t sdp_prepare_product_identifier(void) {
