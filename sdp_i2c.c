@@ -41,8 +41,6 @@
 #include "sensirion_i2c.h"
 #include "sensirion_i2c_hal.h"
 
-#define SDP_I2C_ADDRESS 0x25
-
 int16_t
 sdp_start_continuous_measurement_with_mass_flow_t_comp_and_averaging(void) {
     int16_t error;

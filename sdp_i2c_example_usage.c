@@ -52,6 +52,9 @@ int main(void) {
 
     sensirion_i2c_hal_init();
 
+    // Change the used i2c address 'SDP_I2C_ADDRESS' in sdp_i2c.h
+    printf("Launching SDP driver with I2C address: 0x%x\n", SDP_I2C_ADDRESS);
+
     sdp_stop_continuous_measurement();
     // ignore error if no measurement running
 

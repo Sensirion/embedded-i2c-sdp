@@ -45,6 +45,14 @@ extern "C" {
 
 #include "sensirion_config.h"
 
+#define SDP8XX_I2C_ADDRESS_0 0x25
+#define SDP8XX_I2C_ADDRESS_1 0x26
+#define SDP3X_I2C_ADDRESS_0 0x21
+#define SDP3X_I2C_ADDRESS_1 0x22
+#define SDP3X_I2C_ADDRESS_2 0x23
+
+#define SDP_I2C_ADDRESS SDP8XX_I2C_ADDRESS_0
+
 /**
  * sdp_start_continuous_measurement_with_mass_flow_t_comp_and_averaging() - This
  * command starts continuous measurements with mass flow temperature
