@@ -111,5 +111,11 @@ int main(void) {
         }
     }
 
+    error = sdp_stop_continuous_measurement();
+    if (error) {
+        printf("Error executing sdp_stop_continuous_measurement(): %i\n",
+               error);
+    }
+
     return 0;
 }
